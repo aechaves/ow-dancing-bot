@@ -18,6 +18,65 @@ var path = require('path'),
     ytdl = require('ytdl-core'),
     ffmpeg = require('fluent-ffmpeg');
 
+function buildVideo(inputVideo, inputAudio, outputOptions, videoCodec, audioCodec, outputFile, onFinish, onFinishArgs) {
+  // Append the audio to the mercy dancing video
+  // ffmpeg -i assets/video/mercy_noaudio.mp4 -i assets/audio/audio.mp4 -map 0:v -map 1:a -shortest -c:v libx264 -c:a libfdk_aac assets/video/mercy.mp4
+  var ffmpegCommand = ffmpeg()
+                        .addInput(inputVideo)
+                        .addInput(inputAudio)
+                        .outputOptions(outputOptions)
+                        .videoCodec(videoCodec)
+                        .audioCodec(audioCodec)
+                        .output(outputFile)
+                        .on('end', () => { onFinish.apply(null,onFinishArgs) } )
+                        .run();
+}
+
+function postVideo(filename, message, resp) {
+  T.postMediaChunked({ file_path: filename }, function (err, data, response) {
+    var mediaIdStr = data.media_id_string
+    var meta_params = { media_id: mediaIdStr }
+
+    T.post('media/metadata/create', meta_params, function (err, data, response) {
+      if (!err) {
+        // now we can reference the media and post a tweet (media will attach to the tweet)
+        var params = { status: message, media_ids: [mediaIdStr] }
+
+        T.post('statuses/update', params, function (err, data, response) {
+          if (err){
+            resp.sendStatus(500);
+            console.log('Error!');
+            console.log(err);
+          }
+          else{
+            resp.sendStatus(200);
+            console.log('Posted video!');
+          }
+        })
+      } else {
+        resp.sendStatus(500);
+        console.log('Error!');
+        console.log(err);
+      }
+    })
+  });
+}
+
+function donwloadAudioYT(link, filename, onFinish, onFinishArgs) {
+  // Download a nice song from youtube
+  var yt = ytdl(link, {filter: 'audioonly'})
+    .pipe(fs.createWriteStream(filename))
+    .on('finish', () => { onFinish.apply(null,onFinishArgs) } );
+}
+
+function downloadVideoYT(link, filename, onFinish, onFinishArgs) {
+  var yt = ytdl(link, {filter: 'videoonly'})
+      .pipe(fs.createWriteStream(filename))
+      .on('finish', () => { onFinish.apply(null,onFinishArgs) } );
+}
+
+/* Load a static page in the apps main url */
+
 app.use(express.static('public'));
 
 /* You can use uptimerobot.com or a similar site to hit your /BOT_ENDPOINT to wake up your app and make your Twitter bot tweet. */
@@ -40,50 +99,38 @@ app.all("/" + process.env.BOT_ENDPOINT, function (request, response) {
 app.all("/" + process.env.BOT_ENDPOTINT_MERCY, function (request, response) {
   /* This would post a video of mercy dancing */
   var resp = response;
-  var output = path.resolve(__dirname, 'assets/audio/audio.mp4');
-  // Download a nice song from youtube
-  var yt = ytdl(process.env.NUNCA_ME_FALTES_YT, {filter: 'audioonly'})
-    .pipe(fs.createWriteStream(output))
-    .on('finish', () => {
-      // Append the audio to the mercy dancing video
-      // ffmpeg -i assets/video/mercy_noaudio.mp4 -i assets/audio/audio.mp4 -map 0:v -map 1:a -shortest -c:v libx264 -c:a libfdk_aac assets/video/mercy.mp4
-      var ffmpegCommand = ffmpeg()
-                            .addInput('assets/video/mercy_noaudio.mp4')
-                            .addInput('assets/audio/audio.mp4')
-                            .outputOptions(['-map 0:v','-map 1:a','-shortest'])
-                            .videoCodec('libx264')
-                            .audioCodec('aac')
-                            .output('assets/video/mercy.mp4')
-                            .on('end', () => {
-                              T.postMediaChunked({ file_path: 'assets/video/mercy.mp4' }, function (err, data, response) {
-                                var mediaIdStr = data.media_id_string
-                                var meta_params = { media_id: mediaIdStr }
+  var audio = path.resolve(__dirname, 'assets/audio/audio.mp4');
+  var video = path.resolve(__dirname, 'assets/video/mercy_noaudio.mp4');
+  var outputFile = 'assets/video/mercy.mp4';
+  var codecOptions = ['-map 0:v','-map 1:a','-shortest'];
+  var videoCodec = 'libx264';
+  var audioCodec = 'aac';
+  var status = '💃 #Overwatch';
 
-                                T.post('media/metadata/create', meta_params, function (err, data, response) {
-                                  if (!err) {
-                                    // now we can reference the media and post a tweet (media will attach to the tweet)
-                                    var params = { status: '💃 #Overwatch', media_ids: [mediaIdStr] }
+  if (fs.existsSync(audio) && fs.existsSync(video)) {
+    // Merge video and audio, then post
+    console.log('Building video from cache.');
+    buildVideo(video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]);
 
-                                    T.post('statuses/update', params, function (err, data, response) {
-                                      if (err){
-                                        resp.sendStatus(500);
-                                        console.log('Error!');
-                                        console.log(err);
-                                      }
-                                      else{
-                                        resp.sendStatus(200);
-                                      }
-                                    })
-                                  } else {
-                                    resp.sendStatus(500);
-                                    console.log('Error!');
-                                    console.log(err);
-                                  }
-                                })
-                              });
-                            }).run();
+  } else if (fs.existsSync(audio) && !fs.existsSync(audio)) {
+    // Download audio only
+    console.log('Downloading audio, using video from cache.');
+    donwloadAudioYT(process.env.NUNCA_ME_FALTES_YT, outputFile, buildVideo, [video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]);
 
-  });
+  } else if (fs.existsSync(audio) && !fs.existsSync(audio)) {
+    // Download video only
+    console.log('Downloading video, using audio from cache.');
+    downloadVideoYT(process.env.MERCY_DANCE_YT,outputFile, buildVideo, [video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]);
+  
+  } else {
+    // Download both video and audio only
+    console.log('Downloading both audio and video.');
+    downloadVideoYT(process.env.MERCY_DANCE_YT,outputFile, donwloadAudioYT, [process.env.NUNCA_ME_FALTES_YT,outputFile,buildVideo,[video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]]);
+  
+  }
+
+  
+
 });
 
 var listener = app.listen(process.env.PORT, function () {
