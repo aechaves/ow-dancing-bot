@@ -52,7 +52,7 @@ app.all("/" + process.env.BOT_ENDPOTINT_MERCY, function (request, response) {
                             .addInput('assets/audio/audio.mp4')
                             .outputOptions(['-map 0:v','-map 1:a','-shortest'])
                             .videoCodec('libx264')
-                            .audioCodec('libfdk_aac')
+                            .audioCodec('aac')
                             .output('assets/video/mercy.mp4')
                             .on('end', () => {
                               T.postMediaChunked({ file_path: 'assets/video/mercy.mp4' }, function (err, data, response) {
@@ -74,7 +74,6 @@ app.all("/" + process.env.BOT_ENDPOTINT_MERCY, function (request, response) {
                                         resp.sendStatus(200);
                                       }
                                     })
-                                    
                                   } else {
                                     resp.sendStatus(500);
                                     console.log('Error!');
