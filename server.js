@@ -112,20 +112,20 @@ app.all("/" + process.env.BOT_ENDPOTINT_MERCY, function (request, response) {
     console.log('Building video from cache.');
     buildVideo(video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]);
 
-  } else if (fs.existsSync(audio) && !fs.existsSync(audio)) {
+  } else if (fs.existsSync(video) && !fs.existsSync(audio)) {
     // Download audio only
     console.log('Downloading audio, using video from cache.');
-    donwloadAudioYT(process.env.NUNCA_ME_FALTES_YT, outputFile, buildVideo, [video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]);
+    donwloadAudioYT(process.env.NUNCA_ME_FALTES_YT, audio, buildVideo, [video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]);
 
-  } else if (fs.existsSync(audio) && !fs.existsSync(audio)) {
+  } else if (fs.existsSync(audio) && !fs.existsSync(video)) {
     // Download video only
     console.log('Downloading video, using audio from cache.');
-    downloadVideoYT(process.env.MERCY_DANCE_YT,outputFile, buildVideo, [video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]);
+    downloadVideoYT(process.env.MERCY_DANCE_YT,video, buildVideo, [video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]);
   
   } else {
     // Download both video and audio only
     console.log('Downloading both audio and video.');
-    downloadVideoYT(process.env.MERCY_DANCE_YT,outputFile, donwloadAudioYT, [process.env.NUNCA_ME_FALTES_YT,outputFile,buildVideo,[video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]]);
+    downloadVideoYT(process.env.MERCY_DANCE_YT,video, donwloadAudioYT, [process.env.NUNCA_ME_FALTES_YT,audio,buildVideo,[video, audio, codecOptions, videoCodec, audioCodec, outputFile, postVideo, [outputFile, status, resp]]]);
   
   }
 
