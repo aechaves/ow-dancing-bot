@@ -29,6 +29,9 @@ function buildVideo(inputVideo, inputAudio, outputOptions, videoCodec, audioCode
                         .audioCodec(audioCodec)
                         .output(outputFile)
                         .on('end', () => { onFinish.apply(null,onFinishArgs) } )
+                        .on('error', function(err, stdout, stderr) {
+                          console.log('Cannot process video: ' + err.message);
+                        })
                         .run();
 }
 
