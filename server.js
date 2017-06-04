@@ -62,7 +62,7 @@ app.all("/" + process.env.BOT_ENDPOTINT_MERCY, function (request, response) {
                                 T.post('media/metadata/create', meta_params, function (err, data, response) {
                                   if (!err) {
                                     // now we can reference the media and post a tweet (media will attach to the tweet)
-                                    var params = { status: '💃', media_ids: [mediaIdStr] }
+                                    var params = { status: '💃 #Overwatch', media_ids: [mediaIdStr] }
 
                                     T.post('statuses/update', params, function (err, data, response) {
                                       if (err){
