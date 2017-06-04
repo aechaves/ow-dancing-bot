@@ -74,6 +74,7 @@ app.all("/" + process.env.BOT_ENDPOTINT_MERCY, function (request, response) {
                                         resp.sendStatus(200);
                                       }
                                     })
+                                    
                                   } else {
                                     resp.sendStatus(500);
                                     console.log('Error!');
