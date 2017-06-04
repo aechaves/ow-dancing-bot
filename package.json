@@ -1,21 +1,24 @@
 {
-	"name": "glitch-twitterbot",
+	"name": "ow-dancing-bot",
 	"version": "0.0.1",
-	"description": "Beep beep tweet!",
+	"description": "Post a clip of a dancing overwatch character",
 	"main": "server.js",
 	"scripts": {
 		"start": "node server.js"
 	},
 	"dependencies": {
 		"twit": "^2.1.0",
-		"express": "^4.14.0"
+		"express": "^4.14.0",
+		"ytdl-core": "^0.14.2",
+		"fluent-ffmpeg": "^2.1.2"
 	},
 	"engines": {
 		"node": "6.9.1"
 	},
 	"repository": {
-		"url": ""
+		"url": "https://github.com/aechaves/ow-dancing-bot/"
 	},
+	"license" : "MIT",
 	"keywords": [
 		"node",
     "glitch",
