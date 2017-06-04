@@ -61,4 +61,5 @@ typings/
 .bashrc
 
 # assets
-assets/
+assets/video/*.mp4
+assets/audio/*.mp4
