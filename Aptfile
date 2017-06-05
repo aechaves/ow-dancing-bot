@@ -1,2 +1,2 @@
 ffmpeg
-libglu1-mesa
+libgl1-mesa-glx
