@@ -20,7 +20,8 @@ var path = require('path'),
 
 function buildVideo(inputVideo, inputAudio, outputOptions, videoCodec, audioCodec, outputFile, onFinish, onFinishArgs) {
   // Append the audio to the mercy dancing video
-  // ffmpeg -i assets/video/mercy_noaudio.mp4 -i assets/audio/audio.mp4 -map 0:v -map 1:a -shortest -c:v libx264 -c:a libfdk_aac assets/video/mercy.mp4
+  // ffmpeg -i assets/video/mercy_noaudio.mp4 -i assets/audio/audio.mp4 -map 0:v -map 1:a -shortest -c:v libx264 -c:a aac assets/video/mercy.mp4
+  console.log(arguments);
   var ffmpegCommand = ffmpeg()
                         .addInput(inputVideo)
                         .addInput(inputAudio)
