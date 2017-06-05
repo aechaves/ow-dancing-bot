@@ -21,7 +21,7 @@ var path = require('path'),
 function buildVideo(inputVideo, inputAudio, outputOptions, videoCodec, audioCodec, outputFile, onFinish, onFinishArgs) {
   // Append the audio to the mercy dancing video
   // ffmpeg -i assets/video/mercy_noaudio.mp4 -i assets/audio/audio.mp4 -map 0:v -map 1:a -shortest -c:v libx264 -c:a aac assets/video/mercy.mp4
-  console.log(arguments);
+  console.log("Building video with ffmpeg");
   var ffmpegCommand = ffmpeg()
                         .addInput(inputVideo)
                         .addInput(inputAudio)
@@ -37,6 +37,7 @@ function buildVideo(inputVideo, inputAudio, outputOptions, videoCodec, audioCode
 }
 
 function postVideo(filename, message, resp) {
+  console.log("Posting video with Twit");
   T.postMediaChunked({ file_path: filename }, function (err, data, response) {
     var mediaIdStr = data.media_id_string
     var meta_params = { media_id: mediaIdStr }
@@ -68,15 +69,23 @@ function postVideo(filename, message, resp) {
 
 function donwloadAudioYT(link, filename, onFinish, onFinishArgs) {
   // Download a nice song from youtube
+  console.log("Downloading audio from youtube");
   var yt = ytdl(link, {filter: 'audioonly'})
     .pipe(fs.createWriteStream(filename))
-    .on('finish', () => { onFinish.apply(null,onFinishArgs) } );
+    .on('finish', () => { onFinish.apply(null,onFinishArgs) } )
+    .on('end', function() {
+      console.log('Finished downloading audio!');
+    });
 }
 
 function downloadVideoYT(link, filename, onFinish, onFinishArgs) {
+  console.log("Downloading video from youtube");
   var yt = ytdl(link, {filter: 'videoonly'})
       .pipe(fs.createWriteStream(filename))
-      .on('finish', () => { onFinish.apply(null,onFinishArgs) } );
+      .on('finish', () => { onFinish.apply(null,onFinishArgs) } )
+      .on('end', function() {
+        console.log('Finished downloading video!');
+      });
 }
 
 /* Load a static page in the apps main url */
