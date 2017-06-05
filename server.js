@@ -72,9 +72,9 @@ function donwloadAudioYT(link, filename, onFinish, onFinishArgs) {
   console.log("Downloading audio from youtube");
   var yt = ytdl(link, {filter: 'audioonly'})
     .pipe(fs.createWriteStream(filename))
-    .on('finish', () => { onFinish.apply(null,onFinishArgs) } )
-    .on('end', function() {
+    .on('finish', () => { 
       console.log('Finished downloading audio!');
+      onFinish.apply(null,onFinishArgs);
     });
 }
 
@@ -82,9 +82,9 @@ function downloadVideoYT(link, filename, onFinish, onFinishArgs) {
   console.log("Downloading video from youtube");
   var yt = ytdl(link, {filter: 'videoonly'})
       .pipe(fs.createWriteStream(filename))
-      .on('finish', () => { onFinish.apply(null,onFinishArgs) } )
-      .on('end', function() {
+      .on('finish', () => { 
         console.log('Finished downloading video!');
+        onFinish.apply(null,onFinishArgs);
       });
 }
 
