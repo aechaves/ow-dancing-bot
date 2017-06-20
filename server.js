@@ -5,7 +5,6 @@ var path = require('path'),
     Twit = require('twit'),
     config = require('./config'),
     T = new Twit(config.twitter),
-    stream = T.stream('statuses/sample'),
     fs = require('fs'),
     ytdl = require('ytdl-core'),
     ffmpeg = require('fluent-ffmpeg');
